@@ -1,6 +1,6 @@
 #pragma once
 
-typedef struct Caches;
+typedef void *Caches;
 
 typedef enum {
 	NO_WRITE = 0,
@@ -22,7 +22,7 @@ typedef enum {
    Output :
 	** A pointer to the Caches struct
 */
-Caches* CreateCache(int L1Size, int L2Size, int BlockSize, int L1Way, int L2Way,
+Caches CreateCache(int L1Size, int L2Size, int BlockSize, int L1Way, int L2Way,
 	int L1Cycles, int L2Cycles, int MemCycles, Write_Policy write);
 
 
@@ -32,7 +32,7 @@ Caches* CreateCache(int L1Size, int L2Size, int BlockSize, int L1Way, int L2Way,
 	** op -> Whether we are writing of reading
 	** address -> the address we want to find
 */
-void CacheOperation(Caches* caches, Operation op, int address);
+void CacheOperation(Caches caches, Operation op, int address);
 
 /* Returns the miss rate of the relevant cache
    Input :
