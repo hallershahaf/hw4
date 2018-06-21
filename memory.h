@@ -1,3 +1,5 @@
+#ifndef MEMORY_H_
+#define MEMORY_H_
 
 typedef struct memory_t *Memory;
 
@@ -56,3 +58,5 @@ double returnAvgAccTime(Memory mem);
 	** mem - The memory system to release
 */
 void DestroyMemory(Memory mem);
+
+#endif /* MEMORY_H_ */
