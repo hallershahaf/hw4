@@ -1,6 +1,5 @@
-#pragma once
 
-typedef void *Memory;
+typedef struct memory_t *Memory;
 
 typedef enum {
 	NO_WRITE = 0,
@@ -32,7 +31,7 @@ Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,
 	** op -> Whether we are writing of reading
 	** address -> the address we want to find
 */
-void CacheOperation(Memory mem, Operation op, int address);
+void CacheOperation(Memory mem, Operation op, unsigned long int address);
 
 /* Returns the miss rate of the relevant cache
    Input :

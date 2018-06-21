@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "memory.h"
 
 using std::FILE;
 using std::string;
@@ -12,6 +13,9 @@ using std::ifstream;
 using std::stringstream;
 
 int main(int argc, char **argv) {
+
+	Memory memory;
+	Write_Policy write_policy;
 
 	if (argc < 19) {
 		cerr << "Not enough arguments" << endl;
@@ -60,6 +64,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* initialize memory stuct */
+	write_policy = (WrAlloc)? WRITE : NO_WRITE;
+	memory = CreateMemory(L1Size, L2Size, BSize, L1Assoc, L2Assoc,
+				L1Cyc, L2Cyc, MemCyc, write_policy);
+
+	if (!memory)
+	    return -1;
+
 	while (getline(file, line)) {
 
 		stringstream ss(line);
@@ -69,6 +81,11 @@ int main(int argc, char **argv) {
 			// Operation appears in an Invalid format
 			cout << "Command Format error" << endl;
 			return 0;
+		}
+
+		if (operation != 'r' && operation != 'w') {
+			cout << "Invalid operation " << operation << endl;
+			return -2;
 		}
 
 		// DEBUG - remove this line
@@ -85,6 +102,9 @@ int main(int argc, char **argv) {
 		// DEBUG - remove this line
 		cout << " (dec) " << num << endl;
 
+		Operation op = (operation == 'r') ? OP_READ : OP_WRITE;
+		CacheOperation(memory, op, num);
+
 	}
 
 	double L1MissRate;
@@ -94,6 +114,8 @@ int main(int argc, char **argv) {
 	printf("L1miss=%.03f ", L1MissRate);
 	printf("L2miss=%.03f ", L2MissRate);
 	printf("AccTimeAvg=%.03f\n", avgAccTime);
+
+	DestroyMemory(memory);
 
 	return 0;
 }

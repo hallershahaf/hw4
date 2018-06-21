@@ -23,7 +23,7 @@ typedef enum {
 */
 Cache CreateCache(int size, int blockSize, int nWay);
 
-/* Tries to find a specific address in the cache, whether it's reading or writing
+/* Tries to find a specific address in the cache, whether it's for reading or writing
    Input : 
 	** cache -> The cache we want to search in
 	** address -> The address we want to find
