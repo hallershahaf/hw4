@@ -13,13 +13,10 @@ typedef enum {
 
 typedef enum {
 	SUCESS = 0,
-	REPLACED
+	REPLACED,
+	DIRTY,
+	NOT_FOUND
 } WriteResult;
-
-typedef enum {
-	SUCCESS,
-	DIRTY
-} AllocResult;
 
 
 /* Creates a cache.
@@ -51,12 +48,29 @@ AccessResult TryAccess(Cache cache, unsigned long int address);
  * 	** isDirty -> 'true' if the lru was dirty
  *
  * Output:
- * 	SUCESS - writing was successful
+ * 	SUCCESS - writing was successful
  * 	REPLACED - the address replaced another address
  *
  */
 WriteResult writeAddress(Cache cache, unsigned long int address,
 		unsigned long int *lru_address, bool *isDirty);
+
+/* Removes an address from cache.
+ * returns isDirty = 'true' if the address was dirty
+ * Input:
+ * 	** cache -> The cache to delete from
+ * 	** address -> the address we want to delete 
+ * 	** isDirty -> 'true' if the removed address was dirty
+ *
+ * Output:
+ * 	SUCCESS - deletion was successful
+ * 	DIRTY - deletion was successful but the address
+ * 		was dirty
+ *	NOT_FOUND - this address isn't in cache
+ *
+ */
+WriteResult removeAddress(Cache cache,unsigned long int address,
+		bool *isDirty);
 
 
 /* Releases all the memory allocated to the cache
