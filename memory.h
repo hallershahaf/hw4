@@ -4,8 +4,8 @@
 typedef struct memory_t *Memory;
 
 typedef enum {
-	NO_WRITE = 0,
-	WRITE
+	NO_WRITE_ALLOC = 0,
+	WRITE_ALLOC
 } Write_Policy;
 
 typedef enum {

@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* initialize memory stuct */
-	write_policy = (WrAlloc)? WRITE : NO_WRITE;
+	write_policy = (WrAlloc)? WRITE_ALLOC : NO_WRITE_ALLOC;
 	memory = CreateMemory(L1Size, L2Size, BSize, L1Assoc, L2Assoc,
 				L1Cyc, L2Cyc, MemCyc, write_policy);
 

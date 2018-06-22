@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+
 struct memory_t {
 
 	Cache c1, c2;
@@ -21,6 +22,31 @@ struct memory_t {
 };
 
 
+typedef enum {
+	QUERY_FOUND,
+	QUERY_NOT_FOUND
+} query_status;
+
+static query_status query_memory(Memory memory,unsigned long int address) {
+
+	Cache L1 = memory->c1;
+	Cache L2 = memory->c2;
+
+	// accessing 1st cache 
+	memory->total_time += memory->L1_access_time;
+
+	if(TryAccess(L1,address) == HIT)
+		return QUERY_FOUND;
+
+	// accessing 2nd
+	memory->total_time += memory->L2_access_time;
+
+	if(TryAccess(L2,address) == MISS) {
+		memory->total_time += memory->memory_access_time;
+		memory->L2_misses++;
+	}
+}
+
 static void snoop_cache(Cache cache,unsigned long int address){
 
 	bool isDirty;
@@ -31,11 +57,9 @@ static void snoop_cache(Cache cache,unsigned long int address){
 	// in our implementation we really don't have anything
 	// to do with the result of this operation. It is still
 	// good to have it though
-
-
 }
 
-static void insert_address(Memory memory,unsigned long int address) {
+static void insert_address(Memory memory,unsigned long int address,Operation op) {
 
 	Cache L1 = memory->c1;
 	Cache L2 = memory->c2;
@@ -52,45 +76,30 @@ static void insert_address(Memory memory,unsigned long int address) {
 		}
 	}
 
-	// sanity check
-	assert(TryAccess(L1,address) == MISS);
+	if (op == OP_READ || 
+			(op == OP_WRITE && memory->write_policy == WRITE_ALLOC)) {
+		// sanity check
+		assert(TryAccess(L1,address) == MISS);
 
-
-	res = writeAddress(L1 ,address, &lru_address, &isDirty);
-	if (res == REPLACED) {
-		// inclusion principle must be kept
-		assert(TryAccess(L2,lru_address) == HIT);
-		writeAddress(L2, lru_address, NULL, NULL);
+		res = writeAddress(L1 ,address, &lru_address, &isDirty);
+		if (res == REPLACED) {
+			// inclusion principle must be kept
+			assert(TryAccess(L2,lru_address) == HIT);
+			writeAddress(L2, lru_address, NULL, NULL);
+		}
 	}
 }
 
 static void do_write_op(Memory memory,unsigned long int address){
 
-
+	if(query_memory(memory,address) == QUERY_NOT_FOUND);
+		insert_address(memory, address,OP_WRITE);
 }
 
 static void do_read_op(Memory memory,unsigned long int address) {
 
-	Cache L1 = memory->c1;
-	Cache L2 = memory->c2;
-
-	// accessing 1st cache 
-	memory->total_time += memory->L1_access_time;
-
-	if(TryAccess(L1,address) == HIT)
-		return;
-
-	memory->L1_misses++;
-
-	// accessing 2nd
-	memory->total_time += memory->L2_access_time;
-
-	if(TryAccess(L1,address) == MISS) {
-		memory->total_time += memory->memory_access_time;
-		memory->L2_misses++;
-	}
-
-	insert_address(memory, address);
+	if(query_memory(memory,address) == QUERY_NOT_FOUND);
+		insert_address(memory, address,OP_READ);
 }
 
 Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,

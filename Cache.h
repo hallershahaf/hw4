@@ -12,7 +12,7 @@ typedef enum {
 } AccessResult;
 
 typedef enum {
-	SUCESS = 0,
+	SUCCESS = 0,
 	REPLACED,
 	DIRTY,
 	NOT_FOUND
@@ -27,7 +27,7 @@ typedef enum {
    Output :
 	** A pointer to the cache
 */
-Cache CreateCache(int size, int blockSize, int nWay);
+Cache CreateCache(unsigned int size, int blockSize, int nWay);
 
 /* Tries to find a specific address in the cache, whether it's for reading or writing
    Input :
