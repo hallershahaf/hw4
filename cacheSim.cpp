@@ -107,9 +107,9 @@ int main(int argc, char **argv) {
 
 	}
 
-	double L1MissRate;
-	double L2MissRate;
-	double avgAccTime;
+	double L1MissRate = returnMissRate(memory,1);
+	double L2MissRate = returnMissRate(memory,2);
+	double avgAccTime = returnAvgAccTime(memory);
 
 	printf("L1miss=%.03f ", L1MissRate);
 	printf("L2miss=%.03f ", L2MissRate);

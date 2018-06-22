@@ -28,34 +28,34 @@ Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,
 
 
 /* Performs a write/reasd operation on the caches looking for the relevant address
-   Input : 
-	** mem -> The caches set up we will be using to find the address
+   Input :
+	** memory -> The caches set up we will be using to find the address
 	** op -> Whether we are writing of reading
 	** address -> the address we want to find
 */
-void CacheOperation(Memory mem, Operation op, unsigned long int address);
+void CacheOperation(Memory memory, Operation op, unsigned long int address);
 
 /* Returns the miss rate of the relevant cache
    Input :
-	** mem -> the Caches struct we want to use
+	** memory -> the Caches struct we want to use
 	** index -> whether we want to check L1 or L2
    Output :
 	** A number between 0 and 1, the relevant cache's miss-rate
 */
-double returnMissRate(Memory mem, int wanted_cache);
+double returnMissRate(Memory memory, int wanted_cache);
 
 /* Returns the Average access time for all read/write commands
-   Input : 
-	** mem - The caches struct we want to use
-   Output : 
+   Input :
+	** memory - The caches struct we want to use
+   Output :
 	** The average access time to the caches - (total_cycles / op_num)
 */
-double returnAvgAccTime(Memory mem);
+double returnAvgAccTime(Memory memory);
 
 
 /* Releases all the memory of the relevant memory system
    Input :
-	** mem - The memory system to release
+	** memory - The memory system to release
 */
 void DestroyMemory(Memory mem);
 

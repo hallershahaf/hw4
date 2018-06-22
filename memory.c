@@ -4,10 +4,9 @@
 #include <stdbool.h>
 #include <assert.h>
 
-
 struct memory_t {
 
-	Cache c1, c2;
+	Cache L1, L2;
 	int L1_access_time;
 	int L2_access_time;
 	int memory_access_time;
@@ -21,18 +20,15 @@ struct memory_t {
 
 };
 
-
-typedef enum {
-	QUERY_FOUND,
-	QUERY_NOT_FOUND
+typedef enum { QUERY_FOUND, QUERY_NOT_FOUND
 } query_status;
 
 static query_status query_memory(Memory memory,unsigned long int address) {
 
-	Cache L1 = memory->c1;
-	Cache L2 = memory->c2;
+	Cache L1 = memory->L1;
+	Cache L2 = memory->L2;
 
-	// accessing 1st cache 
+	// accessing 1st cache
 	memory->total_time += memory->L1_access_time;
 
 	if(TryAccess(L1,address) == HIT)
@@ -61,8 +57,8 @@ static void snoop_cache(Cache cache,unsigned long int address){
 
 static void insert_address(Memory memory,unsigned long int address,Operation op) {
 
-	Cache L1 = memory->c1;
-	Cache L2 = memory->c2;
+	Cache L1 = memory->L1;
+	Cache L2 = memory->L2;
 	unsigned long int lru_address;
 	bool isDirty = false;
 	WriteResult res;
@@ -76,7 +72,7 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 		}
 	}
 
-	if (op == OP_READ || 
+	if (op == OP_READ ||
 			(op == OP_WRITE && memory->write_policy == WRITE_ALLOC)) {
 		// sanity check
 		assert(TryAccess(L1,address) == MISS);
@@ -112,15 +108,15 @@ Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,
 	if (!memory)
 		return NULL;
 
-	memory->c1 = CreateCache(L1Size, blockSize, L1Way);
-	memory->c2 = CreateCache(L2Size, blockSize, L2Way);
+	memory->L1 = CreateCache(L1Size, blockSize, L1Way);
+	memory->L2 = CreateCache(L2Size, blockSize, L2Way);
 
 	memory->L1_access_time = L1Cycles;
 	memory->L2_access_time = L2Cycles;
 	memory->memory_access_time = MemCycles;
 	memory->write_policy = write;
 
-	if( !memory->c1 || !memory->c2) {
+	if( !memory->L1 || !memory->L2) {
 		DestroyMemory(memory);
 		return NULL;
 	}
@@ -142,14 +138,25 @@ void CacheOperation(Memory memory, Operation op, unsigned long int address) {
 		do_read_op(memory,address);
 		break;
     	}
+}
 
+double returnMissRate(Memory memory, int wanted_cache) {
+	int L1_misses = memory->L1_misses;
+	int L2_misses = memory->L2_misses;
+	int total_ops = memory->overall_commands;
+
+	return (wanted_cache == 1) ? L1_misses/total_ops : L2_misses/total_ops;
+}
+
+double returnAvgAccTime(Memory memory) {
+	return memory->total_time/memory->overall_commands;
 }
 
 void DestroyMemory(Memory memory) {
 
-	if (memory->c1)
-		ReleaseCache(memory->c1);
-	if (memory->c2)
-		ReleaseCache(memory->c2);
+	if (memory->L1)
+		ReleaseCache(memory->L1);
+	if (memory->L2)
+		ReleaseCache(memory->L2);
 	free(memory);
 }
