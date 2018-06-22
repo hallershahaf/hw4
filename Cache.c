@@ -82,7 +82,7 @@ Cache CreateCache(unsigned int size, unsigned int blockSize, unsigned int nWay) 
 			return NULL;
 		}
 		INIT_LIST_HEAD(&(Sets[i].ghost));
-		for (int j = 0; j < cache->numOfWays; j++) {
+		for (unsigned int j = 0; j < cache->numOfWays; j++) {
 			Sets[i].Ways[j].state = BLOCK_INVALID;
 			Sets[i].Ways[j].tag = 0;
 			list_add(&(Sets[i].Ways[j].LRU), &(Sets[i].ghost));
@@ -98,7 +98,7 @@ AccessResult TryAccess(Cache cache, unsigned long int address) {
 	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
 	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
 	_set *cur_set = &(cur_cache->Sets[set_index]);
-	for (int i = 0; i < cur_cache->numOfWays; i++) {
+	for (unsigned int i = 0; i < cur_cache->numOfWays; i++) {
 		_way *cur_way = &(cur_set->Ways[i]);
 		if (cur_way->tag == tag) {
 			if (cur_way->state != BLOCK_INVALID) {
@@ -124,7 +124,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	_way *cur_way;
 
 	// Check if address is already in cache
-	for (int i = 0; i < cur_cache->numOfWays; i++) {
+	for (unsigned int i = 0; i < cur_cache->numOfWays; i++) {
 		cur_way = &(cur_set->Ways[i]);
 		if (cur_way->tag == tag && cur_way->state != BLOCK_INVALID) {
 			cur_way->state = BLOCK_DIRTY;
@@ -135,7 +135,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	}
 
 	// Find an invalid address
-	for (int j = 0; j < cur_cache->numOfWays; j++) {
+	for (unsigned int j = 0; j < cur_cache->numOfWays; j++) {
 		cur_way = &(cur_set->Ways[j]);
 		if (cur_way->state == BLOCK_INVALID) {
 			cur_way->state = BLOCK_DIRTY;
@@ -162,7 +162,7 @@ WriteResult removeAddress(Cache cache, unsigned long int address,
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	_way *cur_way;
 
-	for (int i = 0; i < cur_cache->numOfWays; i++) {
+	for (unsigned int i = 0; i < cur_cache->numOfWays; i++) {
 		cur_way = &(cur_set->Ways[i]);
 		if (cur_way->tag == tag && cur_way->state != BLOCK_INVALID) {
 			list_del(&(cur_way->LRU));
@@ -183,7 +183,7 @@ WriteResult removeAddress(Cache cache, unsigned long int address,
 void ReleaseCache(Cache cache) {
 	_cache *cur_cache = (_cache*)cache;
 	for (int i = 0; i < Pow2(cur_cache->setBits); i++) {
-		for (int j = 0; j < cur_cache->numOfWays; j++) {
+		for (unsigned int j = 0; j < cur_cache->numOfWays; j++) {
 			free(&(cur_cache->Sets[j].Ways));
 		}
 		free(&(cur_cache->Sets[i]));
