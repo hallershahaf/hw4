@@ -27,20 +27,22 @@ typedef enum {
    Output :
 	** A pointer to the cache
 */
-Cache CreateCache(unsigned int size, int blockSize, int nWay);
+Cache CreateCache(unsigned int size, unsigned int blockSize, unsigned int nWay);
 
-/* Tries to find a specific address in the cache, whether it's for reading or writing
+/* Tries to find a specific address in the cache
+   ---- UPDATES LRU ----
    Input :
 	** cache -> The cache we want to search in
 	** address -> The address we want to find
    Output :
-	** MISS/HIT - whether the address is in the cache or not
+	** MISS/HIT/DIRTY - whether the address is in the cache or not
 */
 AccessResult TryAccess(Cache cache, unsigned long int address);
 
 /* Writes a an address to cache. If the cache is full, the function
  * 	deletes the least recently used address and returns its
  * 	address.
+ * ---- UPDATES LRU ----
  * Input:
  * 	** cache -> The cache to write to
  * 	** address -> the address we want to write
@@ -57,6 +59,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 
 /* Removes an address from cache.
  * returns isDirty = 'true' if the address was dirty
+ * ---- UPDATES LRU ----
  * Input:
  * 	** cache -> The cache to delete from
  * 	** address -> the address we want to delete 
