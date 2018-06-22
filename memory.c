@@ -20,7 +20,9 @@ struct memory_t {
 
 };
 
-typedef enum { QUERY_FOUND, QUERY_NOT_FOUND
+typedef enum { 
+	QUERY_FOUND,
+	QUERY_NOT_FOUND
 } query_status;
 
 static query_status query_memory(Memory memory,unsigned long int address) {
@@ -41,6 +43,8 @@ static query_status query_memory(Memory memory,unsigned long int address) {
 		memory->total_time += memory->memory_access_time;
 		memory->L2_misses++;
 	}
+
+	return QUERY_NOT_FOUND;
 }
 
 static void snoop_cache(Cache cache,unsigned long int address){
@@ -50,6 +54,8 @@ static void snoop_cache(Cache cache,unsigned long int address){
 
 	res = removeAddress(cache, address, &isDirty);
 
+	if (res == DIRTY)
+		return; // ignore
 	// in our implementation we really don't have anything
 	// to do with the result of this operation. It is still
 	// good to have it though
@@ -103,7 +109,7 @@ Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,
 
 	Memory memory;
 
-	memory = calloc(1, sizeof(*memory));
+	memory =(struct memory_t*) calloc(1, sizeof(*memory));
 
 	if (!memory)
 		return NULL;
