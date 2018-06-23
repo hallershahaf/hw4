@@ -15,7 +15,8 @@ struct memory_t {
 
 	/*statistis*/
 	int total_time;
-	int overall_commands;
+	int L1_commands;
+	int L2_commands;
 	int L1_misses;
 	int L2_misses;
 
@@ -32,13 +33,17 @@ static query_status query_memory(Memory memory,unsigned long int address) {
 	Cache L2 = memory->L2;
 
 	// accessing 1st cache
+	memory->L1_commands++;
 	memory->total_time += memory->L1_access_time;
 
 	if(TryAccess(L1,address) == HIT)
 		return QUERY_FOUND;
 
+	memory->L1_misses++;
+
 	// accessing 2nd
 	memory->total_time += memory->L2_access_time;
+	memory->L2_commands++;
 
 	if(TryAccess(L2,address) == MISS) {
 		memory->total_time += memory->memory_access_time;
@@ -88,10 +93,13 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 		assert(TryAccess(L1,address) == MISS);
 
 		res = writeAddress(L1 ,address, &lru_address, &isDirty);
-		if (res == REPLACED) {
+		if (res == REPLACED) { // writeback
 			// inclusion principle must be kept
 			assert(TryAccess(L2,lru_address) == HIT);
-			writeAddress(L2, lru_address, NULL, NULL);
+			if (isDirty) {
+				res = setDirty(L2, lru_address);
+				assert (res == SUCCESS);
+			}
 		}
 
 		if (op == OP_WRITE)
@@ -145,7 +153,6 @@ Memory CreateMemory(int L1Size, int L2Size, int blockSize, int L1Way, int L2Way,
 
 void CacheOperation(Memory memory, Operation op, unsigned long int address) {
 
-	memory->overall_commands++;
 
 	switch(op) {
 
@@ -158,16 +165,21 @@ void CacheOperation(Memory memory, Operation op, unsigned long int address) {
     	}
 }
 
-double returnMissRate(Memory memory, int wanted_cache) {
-	int L1_misses = memory->L1_misses;
-	int L2_misses = memory->L2_misses;
-	int total_ops = memory->overall_commands;
 
-	return (wanted_cache == 1) ? L1_misses/total_ops : L2_misses/total_ops;
+double returnMissRate(Memory memory, int wanted_cache) {
+	double L1_misses = (double) memory->L1_misses;
+	double L2_misses = (double) memory->L2_misses;
+	double L1_ops = (double) memory->L1_commands;
+	double L2_ops = (double) memory->L2_commands;
+
+	return (wanted_cache == 1) ? L1_misses/L1_ops : L2_misses/L2_ops;
 }
 
 double returnAvgAccTime(Memory memory) {
-	return memory->total_time/memory->overall_commands;
+	double total_time = (double) memory->total_time;
+	double total_ops = (double) memory->L1_commands;
+
+	return total_time/total_ops;
 }
 
 void DestroyMemory(Memory memory) {
