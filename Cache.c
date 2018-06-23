@@ -8,7 +8,6 @@
 // Defines and stuff
 
 #define ADDRESS_BITS 32
-#define FULL_MASK 0xffffffff
 
 typedef struct list_head list_head;
 
@@ -97,7 +96,7 @@ AccessResult TryAccess(Cache cache, unsigned long int address) {
 	_cache *cur_cache = (_cache*)cache;
 
 	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
-	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
+	unsigned int set_index = (address & (0xffffffff >> cur_cache->tagBits)) >> cur_cache->blockBits;
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	for (unsigned int i = 0; i < cur_cache->numOfWays; i++) {
 		_way *cur_way = &(cur_set->Ways[i]);
@@ -120,7 +119,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	_cache *cur_cache = (_cache*)cache;
 
 	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
-	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
+	unsigned int set_index = (address & (0xffffffff >> cur_cache->tagBits)) >> cur_cache->blockBits;
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	_way *cur_way;
 
@@ -162,7 +161,7 @@ WriteResult removeAddress(Cache cache, unsigned long int address,
 	bool *isDirty) {
 	_cache *cur_cache = (_cache*)cache;
 	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
-	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
+	unsigned int set_index = (address & (0xffffffff >> cur_cache->tagBits)) >> cur_cache->blockBits;
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	_way *cur_way;
 
@@ -171,10 +170,10 @@ WriteResult removeAddress(Cache cache, unsigned long int address,
 		if (cur_way->tag == tag && cur_way->state != BLOCK_INVALID) {
 			list_del(&(cur_way->LRU));
 			list_add_tail(&(cur_way->LRU), &(cur_set->ghost));
-			}
 			if (cur_way->state == BLOCK_VALID){
 				cur_way->state = BLOCK_INVALID;
 				return SUCCESS;
+			}
 			cur_way->state = BLOCK_INVALID;
 			*isDirty = true;
 			return DIRTY;
@@ -188,7 +187,7 @@ WriteResult setDirty(Cache cache, unsigned long int address){
 	_cache *cur_cache = (_cache*)cache;
 
 	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
-	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
+	unsigned int set_index = (address & (0xffffffff >> cur_cache->tagBits)) >> cur_cache->blockBits;
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	_way *cur_way;
 
