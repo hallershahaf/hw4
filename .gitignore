@@ -4,5 +4,7 @@ Cache
 Session.vim
 tags
 cscope.out
+.vscode
+CacheTest
 *.swp
 *.gch

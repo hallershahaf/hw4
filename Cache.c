@@ -9,7 +9,7 @@
 #define ADDRESS_BITS 32
 #define FULL_MASK 0xffffffff
 
-//typedef struct list_head list_head;
+typedef struct list_head list_head;
 
 typedef enum {
 	BLOCK_INVALID,
@@ -127,7 +127,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	for (unsigned int i = 0; i < cur_cache->numOfWays; i++) {
 		cur_way = &(cur_set->Ways[i]);
 		if (cur_way->tag == tag && cur_way->state != BLOCK_INVALID) {
-			cur_way->state = BLOCK_DIRTY;
+			cur_way->state = BLOCK_VALID;
 			list_del(&(cur_way->LRU));
 			list_add_tail(&(cur_way->LRU), &(cur_set->ghost));
 			return SUCCESS;
@@ -138,7 +138,8 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	for (unsigned int j = 0; j < cur_cache->numOfWays; j++) {
 		cur_way = &(cur_set->Ways[j]);
 		if (cur_way->state == BLOCK_INVALID) {
-			cur_way->state = BLOCK_DIRTY;
+			cur_way->state = BLOCK_VALID;
+			cur_way->tag = tag;
 			list_del(&(cur_way->LRU));
 			list_add_tail(&(cur_way->LRU), &(cur_set->ghost));
 			return SUCCESS;
@@ -147,10 +148,12 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 
 	// Find the LRU address
 	_way *lru_way = list_entry(&((cur_set->ghost).next), _way, LRU);
-	list_del(&(lru_way->LRU));
-	list_add_tail(&(lru_way->LRU), &(cur_set->ghost));
 	*isDirty = (lru_way->state == BLOCK_DIRTY) ? true : false;
 	*lru_address = ((lru_way->tag << cur_cache->setBits) + set_index) << cur_cache->blockBits;
+	lru_way->state = BLOCK_VALID;
+	lru_way->tag = tag;
+	list_del(&(lru_way->LRU));
+	list_add_tail(&(lru_way->LRU), &(cur_set->ghost));
 	return REPLACED;
 }
 
@@ -177,6 +180,24 @@ WriteResult removeAddress(Cache cache, unsigned long int address,
 		}
 	}
 
+	return NOT_FOUND;
+}
+
+WriteResult setDirty(Cache cache, unsigned long int address){
+	_cache *cur_cache = (_cache*)cache;
+
+	unsigned int tag = address >> (cur_cache->blockBits + cur_cache->setBits);
+	unsigned int set_index = (address & (FULL_MASK >> cur_cache->tagBits)) >> cur_cache->blockBits;
+	_set *cur_set = &(cur_cache->Sets[set_index]);
+	_way *cur_way;
+
+	for (int i = 0; i < cur_cache->numOfWays; i++){
+		cur_way = &(cur_set->Ways[i]);
+		if (cur_way->tag == tag && cur_way != BLOCK_INVALID){
+			cur_way->state == BLOCK_DIRTY;
+			return SUCCESS;
+		}
+	}
 	return NOT_FOUND;
 }
 
