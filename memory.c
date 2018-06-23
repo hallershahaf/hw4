@@ -97,9 +97,6 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 		if (op == OP_WRITE)
 			setDirty(L1,address);	
 	}
-
-	if ( op == WRITE_ALLOC )
-		setDirty(L2,address);	
 }
 
 static void do_write_op(Memory memory,unsigned long int address){
