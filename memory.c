@@ -91,12 +91,15 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 	if (op == OP_READ ||
 			(op == OP_WRITE && memory->write_policy == WRITE_ALLOC)) {
 		// sanity check
-		assert(TryAccess(L1,address) == MISS);
+		//assert(TryAccess(L1,address) == MISS);
 
 		res = writeAddress(L1 ,address, &lru_address, &isDirty);
 		if (res == REPLACED) { // writeback
 			// inclusion principle must be kept
-			assert(TryAccess(L2,lru_address) != MISS);
+			//assert(TryAccess(L2,lru_address) != MISS);
+			
+			// we update LRU as part of WB
+			TryAccess(L2,lru_address);
 			if (isDirty) {
 				res = setDirty(L2, lru_address);
 				assert (res == SUCCESS);
@@ -113,10 +116,9 @@ static void do_write_op(Memory memory,unsigned long int address){
 	if(query_memory(memory,address) == QUERY_NOT_FOUND)
 		insert_address(memory, address,OP_WRITE);
 	else {
-		assert(setDirty(memory->L1, address) == SUCCESS);
+		//assert(setDirty(memory->L1, address) == SUCCESS);
 		setDirty(memory->L1, address);
 	}
-
 }
 
 static void do_read_op(Memory memory,unsigned long int address) {
