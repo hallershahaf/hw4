@@ -191,10 +191,10 @@ WriteResult setDirty(Cache cache, unsigned long int address){
 	_set *cur_set = &(cur_cache->Sets[set_index]);
 	_way *cur_way;
 
-	for (int i = 0; i < cur_cache->numOfWays; i++){
+	for (unsigned int i = 0; i < cur_cache->numOfWays; i++){
 		cur_way = &(cur_set->Ways[i]);
-		if (cur_way->tag == tag && cur_way != BLOCK_INVALID){
-			cur_way->state == BLOCK_DIRTY;
+		if (cur_way->tag == tag && cur_way->state != BLOCK_INVALID){
+			cur_way->state = BLOCK_DIRTY;
 			return SUCCESS;
 		}
 	}
