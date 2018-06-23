@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
 
 struct memory_t {
 
@@ -71,7 +72,6 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 
 
 	if (TryAccess(L2, address) == MISS) {
-
 		res = writeAddress(L2 ,address, &lru_address, &isDirty);
 
 		if (res == REPLACED) {
