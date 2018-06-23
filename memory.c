@@ -98,9 +98,9 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 			// inclusion principle must be kept
 			//assert(TryAccess(L2,lru_address) != MISS);
 			
-			// we update LRU as part of WB
-			TryAccess(L2,lru_address);
 			if (isDirty) {
+				// we update LRU as part of WB
+				TryAccess(L2,lru_address);
 				res = setDirty(L2, lru_address);
 				assert (res == SUCCESS);
 			}
