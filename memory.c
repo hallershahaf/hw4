@@ -36,7 +36,7 @@ static query_status query_memory(Memory memory,unsigned long int address) {
 	memory->L1_commands++;
 	memory->total_time += memory->L1_access_time;
 
-	if(TryAccess(L1,address) == HIT)
+	if(TryAccess(L1,address) != MISS)
 		return QUERY_FOUND;
 
 	memory->L1_misses++;
