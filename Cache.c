@@ -3,7 +3,6 @@
 #include "list.h"
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 // Defines and stuff
 
@@ -51,6 +50,7 @@ int Pow2(unsigned int exp) {
 
 // Powers of two
 Cache CreateCache(unsigned int size, unsigned int blockSize, unsigned int nWay) {
+
 	int NumOfBlocks = size - blockSize; // Power of two
 	int PowOfSets = NumOfBlocks - nWay; // Power of two
 	int NumOfSets = Pow2(PowOfSets); // Power of two
@@ -81,8 +81,7 @@ Cache CreateCache(unsigned int size, unsigned int blockSize, unsigned int nWay) 
 			free(cache);
 			return NULL;
 		}
-		list_head *ghost = &(Sets[i].ghost);
-		INIT_LIST_HEAD(ghost);
+		INIT_LIST_HEAD(&(Sets[i].ghost));
 		for (unsigned int j = 0; j < cache->numOfWays; j++) {
 			Sets[i].Ways[j].state = BLOCK_INVALID;
 			Sets[i].Ways[j].tag = 0;
@@ -148,7 +147,7 @@ WriteResult writeAddress(Cache cache, unsigned long int address,
 	}
 
 	// Find the LRU address
-	_way *lru_way = list_entry(cur_set->ghost.next, _way, LRU);
+	_way *lru_way = list_entry(&((cur_set->ghost).next), _way, LRU);
 	*isDirty = (lru_way->state == BLOCK_DIRTY) ? true : false;
 	*lru_address = ((lru_way->tag << cur_cache->setBits) + set_index) << cur_cache->blockBits;
 	lru_way->state = BLOCK_VALID;
@@ -204,11 +203,11 @@ WriteResult setDirty(Cache cache, unsigned long int address){
 
 void ReleaseCache(Cache cache) {
 	_cache *cur_cache = (_cache*)cache;
-	_set *cur_set;
 	for (int i = 0; i < Pow2(cur_cache->setBits); i++) {
-		cur_set = &(cur_cache->Sets[i]);
-		free(cur_set->Ways);
+		for (unsigned int j = 0; j < cur_cache->numOfWays; j++) {
+			free(&(cur_cache->Sets[j].Ways));
+		}
+		free(&(cur_cache->Sets[i]));
 	}
-	free(cur_cache->Sets);
 	free(cur_cache);
 }
