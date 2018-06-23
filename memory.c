@@ -96,7 +96,7 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 		res = writeAddress(L1 ,address, &lru_address, &isDirty);
 		if (res == REPLACED) { // writeback
 			// inclusion principle must be kept
-			assert(TryAccess(L2,lru_address) == HIT);
+			assert(TryAccess(L2,lru_address) != MISS);
 			if (isDirty) {
 				res = setDirty(L2, lru_address);
 				assert (res == SUCCESS);
