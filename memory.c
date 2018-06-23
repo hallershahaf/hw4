@@ -77,14 +77,15 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 
 
 	if (TryAccess(L2, address) == MISS) {
+
+		if ( op == OP_WRITE && memory->write_policy == NO_WRITE_ALLOC)
+			return;
+
 		res = writeAddress(L2 ,address, &lru_address, &isDirty);
 
 		if (res == REPLACED) {
 			snoop_cache(L1,lru_address);
 		}
-
-		if ( op == OP_WRITE && memory->write_policy == NO_WRITE_ALLOC)
-			setDirty(L2,address);	
 	}
 
 	if (op == OP_READ ||
