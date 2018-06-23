@@ -42,6 +42,7 @@ AccessResult TryAccess(Cache cache, unsigned long int address);
 /* Writes a an address to cache. If the cache is full, the function
  * 	deletes the least recently used address and returns its
  * 	address.
+ * 	The function *does not* alter the 'dirty' flag
  * ---- UPDATES LRU ----
  * Input:
  * 	** cache -> The cache to write to
@@ -56,6 +57,19 @@ AccessResult TryAccess(Cache cache, unsigned long int address);
  */
 WriteResult writeAddress(Cache cache, unsigned long int address,
 		unsigned long int *lru_address, bool *isDirty);
+
+/* Sets the address to be dirty (as if the address was written
+ * to)
+ * Input:
+ * 	** cache -> The cache to write to
+ *	** address -> the address we want to write to
+ *
+ * Output:
+ * 	SUCCESS - altering was successful
+ * 	NOT_FOUND - the address isn't in cache
+ *
+ */
+WriteResult setDirty(Cache cache, unsigned long int address);
 
 /* Removes an address from cache.
  * returns isDirty = 'true' if the address was dirty

@@ -73,9 +73,13 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 	if (TryAccess(L2, address) == MISS) {
 
 		res = writeAddress(L2 ,address, &lru_address, &isDirty);
+
 		if (res == REPLACED) {
 			snoop_cache(L1,lru_address);
 		}
+
+		if ( op == OP_WRITE && memory->write_policy == NO_WRITE_ALLOC)
+			setDirty(L2,address);	
 	}
 
 	if (op == OP_READ ||
@@ -89,18 +93,29 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 			assert(TryAccess(L2,lru_address) == HIT);
 			writeAddress(L2, lru_address, NULL, NULL);
 		}
+
+		if (op == OP_WRITE)
+			setDirty(L1,address);	
 	}
+
+	if ( op == WRITE_ALLOC )
+		setDirty(L2,address);	
 }
 
 static void do_write_op(Memory memory,unsigned long int address){
 
-	if(query_memory(memory,address) == QUERY_NOT_FOUND);
+	if(query_memory(memory,address) == QUERY_NOT_FOUND)
 		insert_address(memory, address,OP_WRITE);
+	else {
+		assert(setDirty(memory->L1, address) == SUCCESS);
+		setDirty(memory->L1, address);
+	}
+
 }
 
 static void do_read_op(Memory memory,unsigned long int address) {
 
-	if(query_memory(memory,address) == QUERY_NOT_FOUND);
+	if(query_memory(memory,address) == QUERY_NOT_FOUND)
 		insert_address(memory, address,OP_READ);
 }
 
