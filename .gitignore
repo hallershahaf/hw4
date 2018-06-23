@@ -6,5 +6,6 @@ tags
 cscope.out
 .vscode
 CacheTest
+CacheTest.exe
 *.swp
 *.gch
