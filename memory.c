@@ -36,8 +36,9 @@ static query_status query_memory(Memory memory,unsigned long int address) {
 	memory->L1_commands++;
 	memory->total_time += memory->L1_access_time;
 
-	if(TryAccess(L1,address) != MISS)
+	if(TryAccess(L1,address) != MISS){
 		return QUERY_FOUND;
+	}
 
 	memory->L1_misses++;
 
@@ -90,13 +91,9 @@ static void insert_address(Memory memory,unsigned long int address,Operation op)
 
 	if (op == OP_READ ||
 			(op == OP_WRITE && memory->write_policy == WRITE_ALLOC)) {
-		// sanity check
-		//assert(TryAccess(L1,address) == MISS);
 
 		res = writeAddress(L1 ,address, &lru_address, &isDirty);
 		if (res == REPLACED) { // writeback
-			// inclusion principle must be kept
-			//assert(TryAccess(L2,lru_address) != MISS);
 			
 			if (isDirty) {
 				// we update LRU as part of WB
@@ -116,7 +113,6 @@ static void do_write_op(Memory memory,unsigned long int address){
 	if(query_memory(memory,address) == QUERY_NOT_FOUND)
 		insert_address(memory, address,OP_WRITE);
 	else {
-		//assert(setDirty(memory->L1, address) == SUCCESS);
 		setDirty(memory->L1, address);
 	}
 }

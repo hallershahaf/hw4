@@ -13,7 +13,6 @@ using std::ifstream;
 using std::stringstream;
 
 int main(int argc, char **argv) {
-
 	Memory memory;
 	Write_Policy write_policy;
 
@@ -88,19 +87,10 @@ int main(int argc, char **argv) {
 			return -2;
 		}
 
-		// DEBUG - remove this line
-		//cout << "operation: " << operation;
-
 		string cutAddress = address.substr(2); // Removing the "0x" part of the address
-
-		// DEBUG - remove this line
-		//cout << ", address (hex)" << cutAddress;
 
 		unsigned long int num = 0;
 		num = strtoul(cutAddress.c_str(), NULL, 16);
-
-		// DEBUG - remove this line
-		//cout << " (dec) " << num << endl;
 
 		Operation op = (operation == 'r') ? OP_READ : OP_WRITE;
 		CacheOperation(memory, op, num);
